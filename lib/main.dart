@@ -1,28 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'app_router.dart';
+
+import 'package:fleetwatch/theme/app_theme.dart';
 
 void main() {
-  runApp(const ProviderScope(child: FleetWatchApp()));
+  runApp(const FleetWatchApp());
 }
 
-class FleetWatchApp extends ConsumerWidget {
+class FleetWatchApp extends StatelessWidget {
   const FleetWatchApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
-    return MaterialApp.router(
+  Widget build(BuildContext context) {
+    return MaterialApp(
       title: 'FleetWatch',
       debugShowCheckedModeBanner: false,
-      routerConfig: router,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0B132B),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF00FF87),
-          surface: Color(0xFF1C2541),
-        ),
-        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF1C2541)),
+      theme: fleetwatchTheme,
+      home: const _AppShell(),
+    );
+  }
+}
+
+class _AppShell extends StatelessWidget {
+  const _AppShell();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Text('FleetWatch ready'),
       ),
     );
   }

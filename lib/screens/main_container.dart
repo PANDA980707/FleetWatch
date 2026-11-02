@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
-import 'jobs_screen.dart';
-import 'crewing_screen.dart';
-import 'seatime_screen.dart';
-import 'reviews_screen.dart';
-import 'profile_screen.dart';
+
+import '../theme/app_theme.dart';
 
 class MainContainer extends StatefulWidget {
-  const MainContainer({Key? key}) : super(key: key);
+  const MainContainer({super.key});
 
   @override
   State<MainContainer> createState() => _MainContainerState();
 }
 
 class _MainContainerState extends State<MainContainer> {
-  int _currentIndex = 0;
+  int _index = 0;
 
-  final List<Widget> _screens = const [
+  final List<Widget> _pages = const [
     JobsScreen(),
     CrewingScreen(),
     SeaTimeScreen(),
@@ -27,58 +24,43 @@ class _MainContainerState extends State<MainContainer> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+        index: _index,
+        children: _pages,
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: Colors.white.withOpacity(0.08),
-              width: 1,
-            ),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
-            ),
-          ],
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
+        decoration: const BoxDecoration(
+          color: AppColors.navyAlt,
+          border: Border(top: BorderSide(color: AppColors.border, width: 1)),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: const Color(0xFF1C2541),
-          selectedItemColor: const Color(0xFF00FF87),
-          unselectedItemColor: Colors.white54,
-          selectedFontSize: 12,
-          unselectedFontSize: 11,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.work_outline),
-              activeIcon: Icon(Icons.work),
+        child: NavigationBar(
+          height: 64,
+          selectedIndex: _index,
+          onDestinationSelected: (value) => setState(() => _index = value),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.work_outline_rounded),
+              selectedIcon: Icon(Icons.work_rounded),
               label: 'Вакансии',
             ),
-            BottomNavigationBarItem(
+            NavigationDestination(
               icon: Icon(Icons.business_outlined),
-              activeIcon: Icon(Icons.business),
+              selectedIcon: Icon(Icons.business_rounded),
               label: 'Крюинги',
             ),
-            BottomNavigationBarItem(
+            NavigationDestination(
               icon: Icon(Icons.calculate_outlined),
-              activeIcon: Icon(Icons.calculate),
+              selectedIcon: Icon(Icons.calculate_rounded),
               label: 'Ценз',
             ),
-            BottomNavigationBarItem(
+            NavigationDestination(
               icon: Icon(Icons.rate_review_outlined),
-              activeIcon: Icon(Icons.rate_review),
+              selectedIcon: Icon(Icons.rate_review_rounded),
               label: 'Отзывы',
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline_rounded),
+              selectedIcon: Icon(Icons.person_rounded),
               label: 'Профиль',
             ),
           ],

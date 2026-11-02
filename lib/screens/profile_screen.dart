@@ -1,68 +1,64 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B132B),
+      backgroundColor: AppColors.navy,
       appBar: AppBar(
-        title: const Text(
-          'Профиль & PRO',
-          style: TextStyle(
-            color: Color(0xFF00FF87),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: const Color(0xFF1C2541),
+        title: const Text('Профиль & PRO'),
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           children: [
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: const Color(0xFF1C2541),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFF00FF87).withOpacity(0.4)),
+                color: AppColors.panel,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: AppColors.border),
               ),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 31,
-                    backgroundColor: Color(0xFF00FF87),
-                    child: Icon(Icons.person, size: 34, color: Color(0xFF0B132B)),
+                  Container(
+                    width: 68,
+                    height: 68,
+                    decoration: BoxDecoration(
+                      color: AppColors.emerald,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: const Icon(Icons.person, size: 38, color: AppColors.navy),
                   ),
                   const SizedBox(width: 16),
-                  Expanded(
+                  const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Капитан Александр',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 20,
                           ),
                         ),
                         SizedBox(height: 4),
                         Text(
                           'Master / Captain (FG)',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                          ),
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                         ),
                         SizedBox(height: 8),
                         Text(
                           '🟢 Готов к выходу в рейс',
                           style: TextStyle(
-                            color: Color(0xFF00FF87),
+                            color: AppColors.emerald,
+                            fontWeight: FontWeight.w700,
                             fontSize: 12,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
@@ -74,85 +70,76 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 22),
             const Text(
               'Морской PRO-функционал',
-              style: TextStyle(
-                color: Color(0xFF00F2FE),
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 12),
-            _buildFeatureTile(
-              context,
-              icon: Icons.picture_as_pdf,
+            _FeatureTile(
+              icon: Icons.picture_as_pdf_rounded,
               title: 'Генератор CV в PDF',
               subtitle: 'Создать международное резюме за 1 клик.',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('PDF-резюме успешно создано.')),
-                );
-              },
             ),
             const SizedBox(height: 10),
-            _buildFeatureTile(
-              context,
-              icon: Icons.notifications_active,
+            _FeatureTile(
+              icon: Icons.notifications_active_rounded,
               title: 'Трекер документов и дипломов',
               subtitle: 'Напоминания о STCW, медкомиссии и сертификатах.',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Все сертификаты актуальны.')),
-                );
-              },
             ),
             const SizedBox(height: 10),
-            _buildFeatureTile(
-              context,
-              icon: Icons.rocket_launch,
+            _FeatureTile(
+              icon: Icons.rocket_launch_rounded,
               title: 'Авторассылка в 50+ крюингов',
-              subtitle: 'Приоритетная рассылка анкеты для PRO-пользователей.',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Анкета отправлена в крюинговые компании.')),
-                );
-              },
+              subtitle: 'Приоритетная загрузка анкеты для PRO-пользователей.',
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  static Widget _buildFeatureTile(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
+class _FeatureTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _FeatureTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C2541).withOpacity(0.7),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        color: AppColors.panel,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
       ),
       child: ListTile(
-        leading: Icon(icon, color: const Color(0xFF00FF87), size: 28),
+        leading: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: AppColors.emerald.withOpacity(0.14),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: AppColors.emerald),
+        ),
         title: Text(
           title,
           style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w700,
           ),
         ),
         subtitle: Text(
           subtitle,
-          style: const TextStyle(
-            color: Colors.white54,
-            fontSize: 12,
-          ),
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 16),
-        onTap: onTap,
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textMuted),
+        onTap: () {},
       ),
     );
   }

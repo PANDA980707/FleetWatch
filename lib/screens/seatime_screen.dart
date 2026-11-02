@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
+
 class SeaTimeScreen extends StatefulWidget {
   const SeaTimeScreen({super.key});
 
@@ -25,16 +27,9 @@ class _SeaTimeScreenState extends State<SeaTimeScreen> {
     final missing = (requirement - _monthsInService).clamp(0, 100).toInt();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B132B),
+      backgroundColor: AppColors.navy,
       appBar: AppBar(
-        title: const Text(
-          'Калькулятор Плавценза',
-          style: TextStyle(
-            color: Color(0xFF00FF87),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: const Color(0xFF1C2541),
+        title: const Text('Калькулятор плавцена'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -42,36 +37,42 @@ class _SeaTimeScreenState extends State<SeaTimeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Расчет стажа для повышения диплома',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Укажите должность и суммарный наплаванный стаж в месяцах.',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 24),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1C2541),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF00FF87).withOpacity(0.3)),
+                  color: AppColors.panel,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Расчёт стажа для повышения диплома',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Укажите должность и суммарный наплаванный стаж в месяцах.',
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.panel,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: DropdownButton<String>(
                   value: _selectedRank,
                   isExpanded: true,
                   underline: const SizedBox(),
-                  dropdownColor: const Color(0xFF1C2541),
-                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                  dropdownColor: AppColors.panelAlt,
+                  style: const TextStyle(color: AppColors.textPrimary),
                   items: _requirements.keys.map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -85,59 +86,69 @@ class _SeaTimeScreenState extends State<SeaTimeScreen> {
                   },
                 ),
               ),
-              const SizedBox(height: 24),
-              Text(
-                'Наплаванный стаж: ${_monthsInService.toStringAsFixed(0)} месяцев',
-                style: const TextStyle(
-                  color: Color(0xFF00FF87),
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: AppColors.panel,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.border),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Slider(
-                value: _monthsInService,
-                min: 0,
-                max: 36,
-                divisions: 36,
-                activeColor: const Color(0xFF00FF87),
-                inactiveColor: Colors.white24,
-                label: '${_monthsInService.round()} мес.',
-                onChanged: (value) {
-                  setState(() => _monthsInService = value);
-                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Наплаванный стаж: ${_monthsInService.toStringAsFixed(0)} месяцев',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.emerald,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Slider(
+                      value: _monthsInService,
+                      min: 0,
+                      max: 36,
+                      divisions: 36,
+                      activeColor: AppColors.emerald,
+                      inactiveColor: AppColors.border,
+                      label: '${_monthsInService.round()} мес.',
+                      onChanged: (value) {
+                        setState(() => _monthsInService = value);
+                      },
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 20),
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1C2541),
-                  borderRadius: BorderRadius.circular(16),
+                  color: metRequirement ? AppColors.emerald.withOpacity(0.08) : AppColors.amber.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: metRequirement
-                        ? const Color(0xFF00FF87)
-                        : const Color(0xFFFFB703),
+                    color: metRequirement ? AppColors.emerald : AppColors.amber,
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '📊 Статус соответствия требований',
+                    Text(
+                      metRequirement ? '✅ Требование выполнено' : '⚠️ Не хватает стажа',
                       style: TextStyle(
-                        color: Color(0xFF00F2FE),
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: metRequirement ? AppColors.emerald : AppColors.amber,
                       ),
                     ),
                     const SizedBox(height: 10),
                     Text(
                       metRequirement
-                          ? '✅ Ценз достаточен для подачи документов на подтверждение диплома.'
-                          : '⚠️ Не хватает $missing месяцев до необходимого минимума для ${_selectedRank}.',
+                          ? 'Ценз достаточен для подачи документов на подтверждение диплома.'
+                          : 'Не хватает $missing месяцев до необходимого минимума для $_selectedRank.',
                       style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
+                        color: AppColors.textSecondary,
                         height: 1.5,
                       ),
                     ),
@@ -145,8 +156,8 @@ class _SeaTimeScreenState extends State<SeaTimeScreen> {
                     Text(
                       'Требуется: ${requirement.toInt()} мес.',
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
