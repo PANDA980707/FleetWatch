@@ -1,0 +1,4 @@
+storage/
+.git/
+build/
+.dart_tool/
