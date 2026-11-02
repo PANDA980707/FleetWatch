@@ -13,7 +13,6 @@ class JobsScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.star, color: Color(0xFF00FF87)),
             onPressed: () {
-              // PRO Монетизация: Подписка
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('FleetWatch PRO активирован: Доступ к горячим вакансиям!')),
               );
@@ -72,7 +71,7 @@ class JobsScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(vessel, style: const TextStyle(color: Colors.white7Names ?? Colors.white70, fontSize: 13)),
+          Text(vessel, style: const TextStyle(color: Colors.white70, fontSize: 13)),
           Text('Крюинг: $company', style: const TextStyle(color: Colors.white54, fontSize: 13)),
           const SizedBox(height: 14),
           SizedBox(
@@ -84,7 +83,6 @@ class JobsScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: () {
-                // Действие при отклике
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Отклик отправлен в крюинг!')),
                 );
