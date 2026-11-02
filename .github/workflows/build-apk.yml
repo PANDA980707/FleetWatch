@@ -17,6 +17,11 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Recreate Android platform
+        run: |
+          rm -rf android
+          flutter create . --platforms=android --project-name fleetwatch
+
       - name: Get dependencies
         run: flutter pub get
 
