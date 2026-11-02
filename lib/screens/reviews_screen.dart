@@ -8,7 +8,7 @@ class ReviewsScreen extends StatefulWidget {
 }
 
 class _ReviewsScreenState extends State<ReviewsScreen> {
-  final List> _reviews = [
+  final List<Map<String, dynamic>> _reviews = [
     {
       'vessel': 'M/V Pacific Leader (Container)',
       'company': 'Marlow Navigation',
