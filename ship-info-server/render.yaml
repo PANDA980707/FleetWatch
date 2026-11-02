@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: ship-info
+    runtime: docker
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: AISSTREAM_API_KEY
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: DB_PATH
+        value: /data/data.db
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1

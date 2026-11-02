@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ship Info</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#2b7fd8">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{--card:#fff;--ink:#0f2236;--mut:#5c7088;--line:#d6e0ea;--accent:#1f6fd0}
+@media (prefers-color-scheme:dark){:root{--card:#14263a;--ink:#e8f0f8;--mut:#92a6bb;--line:#24405c;--accent:#5aa2f0}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:"Segoe UI",Roboto,system-ui,sans-serif;color:var(--ink)}
+#map{position:absolute;inset:0}
+.top{position:absolute;z-index:1000;top:calc(10px + env(safe-area-inset-top,0px));left:10px;right:10px;max-width:480px}
+.bar{display:flex;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 10px}
+.bar b{font-size:16px;white-space:nowrap}
+.bar input{flex:1;min-width:0;border:0;background:none;color:var(--ink);font-size:16px;padding:8px}
+.bar input:focus{outline:none}
+#res{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-top:6px;max-height:40vh;overflow:auto;display:none}
+#res button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:11px 14px;color:var(--ink);font:inherit}
+#res small{color:var(--mut)}
+#info{position:absolute;z-index:1000;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);border-radius:18px 18px 0 0;padding:14px 16px calc(16px + env(safe-area-inset-bottom,0px));display:none;max-width:560px;margin:0 auto}
+#info h2{margin:0 0 2px;font-size:19px}
+#info .sub{color:var(--mut);font-size:14px;margin-bottom:10px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:14px}
+.g small{display:block;color:var(--mut)}
+#x{position:absolute;right:12px;top:10px;background:none;border:0;color:var(--mut);font-size:22px}
+#hint{position:absolute;z-index:1000;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:10px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:12px;color:var(--mut)}
+button:focus-visible{outline:2px solid var(--accent)}
+.pill{border:1px solid var(--line);background:none;color:var(--ink);border-radius:99px;padding:6px 11px;font-size:13px;white-space:nowrap}
+#sheet{position:absolute;z-index:2000;inset:0;background:var(--card);display:none;overflow:auto}
+#sheetBody{max-width:560px;margin:0 auto;padding:calc(56px + env(safe-area-inset-top,0px)) 16px 32px}
+#sheetX{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:12px;background:none;border:0;color:var(--mut);font-size:28px;z-index:2001}
+.f{display:block;width:100%;margin:6px 0;padding:11px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--ink);font:inherit}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px 16px;font:inherit;margin:6px 0}
+.lnk{background:none;border:0;color:var(--accent);padding:0;font-size:12px}
+.rv{border-top:1px solid var(--line);padding:8px 0;font-size:14px}.rv p{margin:4px 0}
+.err{color:#d9534f;font-size:14px}.job{border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+#info{max-height:70vh;overflow:auto}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="top">
+  <div class="bar"><b>🚢</b><input id="q" type="search" placeholder="Название, IMO, MMSI" aria-label="Поиск судна"><button class="pill" id="jobsBtn">Вакансии</button><button class="pill" id="acc">Войти</button></div>
+  <div id="res"></div>
+</div>
+<div id="sheet"><button id="sheetX" aria-label="Закрыть">×</button><div id="sheetBody"></div></div>
+<div id="hint">Загрузка…</div>
+<div id="info"><button id="x" aria-label="Закрыть">×</button><div id="card"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+var API=""; // пусто, если страница открыта с самого сервера
+var COLORS={"Грузовое":"#2e8b57","Танкер":"#d9534f","Пассажирское":"#1f6fd0","Рыболовное":"#e0a020","Буксир":"#8a5cc2","Яхта":"#17a2b8","Другое":"#7a8896"};
+var map=L.map("map",{preferCanvas:true}).setView([55,15],5);
+fetch("/config.json").then(function(r){return r.json()}).catch(function(){return{tileUrl:"https://tile.openstreetmap.org/{z}/{x}/{y}.png",attr:"© OpenStreetMap"}}).then(function(c){L.tileLayer(c.tileUrl,{maxZoom:18,attribution:c.attr}).addTo(map)});
+var layer=L.layerGroup().addTo(map);
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function get(u){return fetch(API+u).then(function(r){return r.json()})}
+
+function load(){
+  var b=map.getBounds();
+  get("/api/ships?bbox="+[b.getSouth(),b.getWest(),b.getNorth(),b.getEast()].join(",")).then(function(list){
+    layer.clearLayers();
+    list.forEach(function(s){
+      var m=L.circleMarker([s.lat,s.lon],{radius:s.speed>0.5?5:3.5,color:"#fff",weight:1,fillColor:COLORS[s.type]||COLORS["Другое"],fillOpacity:.95});
+      m.on("click",function(){show(s)});
+      m.addTo(layer);
+    });
+    el("hint").textContent="Судов на экране: "+list.length;
+  }).catch(function(){el("hint").textContent="Нет связи с сервером"});
+}
+function el(id){return document.getElementById(id)}
+function show(s){
+  var eta=s.eta&&s.eta.Month?(s.eta.Day+"."+String(s.eta.Month).padStart(2,"0")+" "+String(s.eta.Hour).padStart(2,"0")+":"+String(s.eta.Minute).padStart(2,"0")):"—";
+  var rows=[["Тип",s.type],["Статус",s.status],["Скорость",s.speed!=null?s.speed+" уз":"—"],["Курс",s.course!=null?s.course+"°":"—"],["IMO",s.imo||"—"],["MMSI",s.mmsi],["Размер",s.length?s.length+" × "+s.width+" м":"—"],["Осадка",s.draught?s.draught+" м":"—"],["Прибытие",eta]];
+  el("card").innerHTML="<h2>"+esc(s.name)+"</h2><div class='sub'>Куда: "+esc(s.dest||"не указано")+"</div><div class='g'>"+rows.map(function(r){return "<div><small>"+r[0]+"</small>"+esc(r[1])+"</div>"}).join("")+"</div><p class='sub' style='margin:10px 0 0;font-size:12px'>Данные AIS могут быть неточными и задержанными. Не используйте для навигации.</p>";
+  el("info").style.display="block";
+}
+el("x").onclick=function(){el("info").style.display="none"};
+var t;
+el("q").oninput=function(e){
+  clearTimeout(t);var v=e.target.value.trim();
+  if(v.length<3){el("res").style.display="none";return}
+  t=setTimeout(function(){get("/api/search?q="+encodeURIComponent(v)).then(function(l){
+    var r=el("res");r.style.display="block";
+    if(!l.length){r.innerHTML="<button disabled>Ничего не найдено. Судно могло не передавать позицию последние 30 минут.</button>";return}
+    r.innerHTML=l.map(function(s,i){return "<button data-i='"+i+"'><b>"+esc(s.name)+"</b><br><small>"+esc(s.type)+" · MMSI "+s.mmsi+"</small></button>"}).join("");
+    r.onclick=function(ev){var b=ev.target.closest("button");if(!b||b.disabled)return;var s=l[+b.getAttribute("data-i")];r.style.display="none";map.setView([s.lat,s.lon],11);show(s)};
+  })},300);
+};
+map.on("moveend",load);
+setInterval(load,15000);
+load();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");
+</script>
+<script>
+var me=null,mode="login";
+function api(m,u,b){return fetch(u,{method:m,headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined}).then(function(r){return r.json()}).catch(function(){return{error:"Нет связи с сервером"}})}
+function stars(n){return "★★★★★".slice(0,n)+"☆☆☆☆☆".slice(0,5-n)}
+function dt(t){return new Date(t).toLocaleDateString("ru-RU")}
+function sheet(h){el("sheetBody").innerHTML=h;el("sheet").style.display="block";el("sheet").scrollTop=0}
+el("sheetX").onclick=function(){el("sheet").style.display="none"};
+function refresh(){return api("GET","/api/me").then(function(r){me=r.user||null;el("acc").textContent=me?me.name.slice(0,12):"Войти"})}
+function authView(err){
+ if(me){sheet("<h2>"+esc(me.name)+"</h2><p class='sub'>"+esc(me.email)+" · "+(me.role==="agency"?"Крюинговое агентство":"Моряк")+"</p><button class='btn' id='out'>Выйти</button>");return}
+ var reg=mode==="reg";
+ sheet("<h2>"+(reg?"Регистрация":"Вход")+"</h2>"+(reg?"<input class='f' id='nm' placeholder='Имя или название агентства' maxlength='50'><select class='f' id='rl'><option value='seaman'>Я моряк</option><option value='agency'>Я крюинговое агентство</option></select>":"")+"<input class='f' id='em' type='email' placeholder='Email'><input class='f' id='pw' type='password' placeholder='Пароль (от 8 символов)'><div class='err'>"+esc(err||"")+"</div><button class='btn' id='go'>"+(reg?"Создать аккаунт":"Войти")+"</button><br><button class='lnk' id='sw'>"+(reg?"Уже есть аккаунт? Войти":"Нет аккаунта? Зарегистрироваться")+"</button>");
+}
+function jobsView(msg){
+ api("GET","/api/jobs").then(function(l){
+  var h="<h2>Вакансии для моряков</h2>"+(msg?"<p class='sub'>"+esc(msg)+"</p>":"");
+  h+=l.map(function(j){return "<div class='job'><b>"+esc(j.title)+"</b><div class='sub'>"+esc(j.agency)+" · "+dt(j.created)+"</div><div>"+esc([j.rank,j.ship_type,j.salary].filter(Boolean).join(" · "))+"</div><p>"+esc(j.descr)+"</p><b>Контакт:</b> "+esc(j.contact)+"</div>"}).join("")||"<p class='sub'>Пока нет объявлений.</p>";
+  h+="<p class='sub'>Если агентство просит деньги за трудоустройство, это признак мошенничества: по конвенции MLC 2006 моряк не платит за найм.</p>";
+  if(me&&me.role==="agency")h+="<h3>Разместить объявление</h3><input class='f' id='jt' placeholder='Заголовок, например: Требуется 2-й помощник' maxlength='100'><input class='f' id='jr' placeholder='Должность'><input class='f' id='js' placeholder='Тип судна'><input class='f' id='jp' placeholder='Зарплата'><input class='f' id='jc' placeholder='Контакт (email или телефон)'><textarea class='f' id='jd' rows='4' placeholder='Описание, условия контракта' maxlength='2000'></textarea><div class='err' id='jerr'></div><button class='btn' id='post'>Отправить на проверку</button>";
+  else if(!me)h+="<p><button class='btn' id='goauth'>Войти или зарегистрироваться</button></p><p class='sub'>Агентства могут разместить объявление после регистрации.</p>";
+  if(me&&me.admin)return api("GET","/api/admin/queue").then(function(q){
+   h+="<h3>Модерация</h3>"+q.jobs.map(function(j){return "<div class='job'><b>"+esc(j.title)+"</b><div class='sub'>"+esc(j.agency)+" · "+esc(j.email)+"</div><p>"+esc(j.descr)+"</p><button class='btn' data-adm='jobs:"+j.id+":approve'>Одобрить</button> <button class='lnk' data-adm='jobs:"+j.id+":reject'>Отклонить</button></div>"}).join("")+q.reviews.map(function(r){return "<div class='job'><b>"+esc(r.ship)+"</b> · жалоб: "+r.reports+(r.hidden?" · скрыт":"")+"<p>"+esc(r.text)+"</p><button class='lnk' data-adm='reviews:"+r.id+":hide'>Скрыть</button> <button class='lnk' data-adm='reviews:"+r.id+":show'>Оставить</button></div>"}).join("");
+   sheet(h)});
+  sheet(h)});
+}
+el("sheetBody").onclick=function(e){
+ var t=e.target,id=t.id,v=function(i){return el(i)?el(i).value:""};
+ if(id==="sw"){mode=mode==="reg"?"login":"reg";authView()}
+ else if(id==="goauth")authView();
+ else if(id==="go"){api("POST",mode==="reg"?"/api/register":"/api/login",{email:v("em"),password:v("pw"),name:v("nm"),role:v("rl")}).then(function(r){if(r.error)return authView(r.error);refresh().then(function(){el("sheet").style.display="none"})})}
+ else if(id==="out"){api("POST","/api/logout").then(function(){me=null;el("acc").textContent="Войти";el("sheet").style.display="none"})}
+ else if(id==="post"){api("POST","/api/jobs",{title:v("jt"),rank:v("jr"),shipType:v("js"),salary:v("jp"),contact:v("jc"),description:v("jd")}).then(function(r){if(r.error)el("jerr").textContent=r.error;else jobsView("Объявление отправлено на проверку. После одобрения оно появится в списке.")})}
+ else if(t.getAttribute("data-adm")){var a=t.getAttribute("data-adm").split(":");api("POST","/api/admin/"+a[0]+"/"+a[1],{action:a[2]}).then(function(){jobsView()})}
+};
+function loadReviews(s){
+ var o=el("rev");if(o)o.remove();
+ var box=document.createElement("div");box.id="rev";el("card").appendChild(box);
+ api("GET","/api/reviews?mmsi="+s.mmsi).then(function(r){
+  if(r.error)return;
+  var h="<h3>Отзывы"+(r.count?" · "+stars(Math.round(r.avg))+" "+r.avg.toFixed(1)+" ("+r.count+")":"")+"</h3>";
+  h+=r.items.map(function(i){return "<div class='rv'><b>"+esc(i.name)+"</b> "+stars(i.rating)+" <small>"+dt(i.created)+"</small><p>"+esc(i.text)+"</p><button class='lnk' data-rep='"+i.id+"'>Пожаловаться</button></div>"}).join("")||"<p class='sub'>Отзывов пока нет.</p>";
+  h+=me?"<select class='f' id='rt'><option value='5'>★★★★★ Отлично</option><option value='4'>★★★★ Хорошо</option><option value='3'>★★★ Нормально</option><option value='2'>★★ Плохо</option><option value='1'>★ Ужасно</option></select><textarea class='f' id='rx' rows='3' maxlength='1000' placeholder='Расскажите о своём опыте работы на этом судне'></textarea><div class='err' id='rerr'></div><button class='btn' id='rs'>Опубликовать отзыв</button><p class='sub'>Пишите только о том, что знаете сами. Отзывы проверяются по жалобам.</p>":"<button class='btn' id='rl2'>Войдите, чтобы оставить отзыв</button>";
+  box.innerHTML=h;
+  box.onclick=function(e){var t=e.target,rp=t.getAttribute("data-rep");
+   if(rp){if(!me)return authView();api("POST","/api/reviews/"+rp+"/report").then(function(x){t.textContent=x.error||"Жалоба принята";t.disabled=true})}
+   if(t.id==="rs")api("POST","/api/reviews",{mmsi:s.mmsi,ship:s.name,rating:el("rt").value,text:el("rx").value}).then(function(x){if(x.error)el("rerr").textContent=x.error;else loadReviews(s)});
+   if(t.id==="rl2")authView()};
+ });
+}
+var _show=show;show=function(s){_show(s);loadReviews(s)};
+el("acc").onclick=function(){authView()};
+el("jobsBtn").onclick=function(){jobsView()};
+refresh();
+</script>
+</body>
+</html>
