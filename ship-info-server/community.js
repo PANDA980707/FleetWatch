@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS reviews(id INTEGER PRIMARY KEY, mmsi INTEGER, ship TE
 CREATE TABLE IF NOT EXISTS reports(review INTEGER, user INTEGER, PRIMARY KEY(review,user));
 CREATE TABLE IF NOT EXISTS jobs(id INTEGER PRIMARY KEY, user INTEGER, title TEXT, rank TEXT, ship_type TEXT, salary TEXT, contact TEXT, descr TEXT, status TEXT DEFAULT 'pending', created INTEGER);`);
 const Q = (sql) => db.prepare(sql);
+db.exec("CREATE TABLE IF NOT EXISTS applications(id INTEGER PRIMARY KEY, job INTEGER, user INTEGER, message TEXT, status TEXT DEFAULT 'new', created INTEGER, UNIQUE(job,user))");
 const ADMIN = (process.env.ADMIN_EMAIL || "").toLowerCase();
 const sha = (s) => crypto.createHash("sha256").update(s).digest("hex");
 const hash = (p) => { const s = crypto.randomBytes(16).toString("hex"); return s + ":" + crypto.scryptSync(p, s, 64).toString("hex"); };
@@ -27,14 +28,14 @@ function readBody(req) {
   });
 }
 function userOf(req) {
-  const m = /(?:^|; )sid=([a-f0-9]{64})/.exec(req.headers.cookie || ""); if (!m) return null;
+  const m = /^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization || "") || /(?:^|; )sid=([a-f0-9]{64})/.exec(req.headers.cookie || ""); if (!m) return null;
   return Q("SELECT u.id,u.email,u.name,u.role FROM sessions s JOIN users u ON u.id=s.user WHERE s.token=? AND s.exp>?").get(sha(m[1]), Date.now()) || null;
 }
 function startSession(req, res, id) {
   const t = crypto.randomBytes(32).toString("hex"), age = 30 * 86400;
   Q("INSERT INTO sessions(token,user,exp) VALUES(?,?,?)").run(sha(t), id, Date.now() + age * 1000);
   const secure = req.headers["x-forwarded-proto"] === "https" ? "; Secure" : "";
-  res.setHeader("Set-Cookie", "sid=" + t + "; HttpOnly; SameSite=Lax; Path=/; Max-Age=" + age + secure);
+  res.setHeader("Set-Cookie", "sid=" + t + "; HttpOnly; SameSite=Lax; Path=/; Max-Age=" + age + secure); return t;
 }
 
 module.exports = async function (req, res, u, json) {
@@ -53,13 +54,13 @@ module.exports = async function (req, res, u, json) {
       if (pw.length < 8 || pw.length > 100) return json(res, 400, { error: "Пароль должен быть от 8 символов" });
       if (Q("SELECT 1 FROM users WHERE email=?").get(email)) return json(res, 409, { error: "Этот email уже зарегистрирован" });
       const r = Q("INSERT INTO users(email,name,role,pass,created) VALUES(?,?,?,?,?)").run(email, name, role, hash(pw), Date.now());
-      startSession(req, res, Number(r.lastInsertRowid)); return json(res, 200, { ok: true });
+      return json(res, 200, { ok: true, token: startSession(req, res, Number(r.lastInsertRowid)) });
     }
     if (p === "/api/login" && m === "POST") {
       if (authLimited(req)) return json(res, 429, { error: "Слишком много попыток. Подождите минуту." });
       const row = Q("SELECT id,pass FROM users WHERE email=?").get(str(b.email, 100).toLowerCase());
       if (!row || !check(String(b.password || ""), row.pass)) return json(res, 401, { error: "Неверный email или пароль" });
-      startSession(req, res, row.id); return json(res, 200, { ok: true });
+      return json(res, 200, { ok: true, token: startSession(req, res, row.id) });
     }
     if (p === "/api/logout" && m === "POST") {
       const c = /(?:^|; )sid=([a-f0-9]{64})/.exec(req.headers.cookie || ""); if (c) Q("DELETE FROM sessions WHERE token=?").run(sha(c[1]));
@@ -100,6 +101,23 @@ module.exports = async function (req, res, u, json) {
       if (Q("SELECT COUNT(*) c FROM jobs WHERE user=? AND status='pending'").get(me.id).c >= 5) return json(res, 429, { error: "Слишком много объявлений на проверке" });
       Q("INSERT INTO jobs(user,title,rank,ship_type,salary,contact,descr,created) VALUES(?,?,?,?,?,?,?,?)").run(me.id, j.title, j.rank, j.st, j.salary, j.contact, j.descr, Date.now());
       return json(res, 200, { ok: true });
+    }
+    if (p === "/api/apply" && m === "POST") {
+      if (!me) return need();
+      if (me.role !== "seaman") return json(res, 403, { error: "Откликаться могут только моряки" });
+      const jid = parseInt(b.job), msg = str(b.message, 500);
+      if (!Q("SELECT 1 FROM jobs WHERE id=? AND status='approved'").get(jid)) return json(res, 404, { error: "Вакансия не найдена" });
+      Q("INSERT OR IGNORE INTO applications(job,user,message,created) VALUES(?,?,?,?)").run(jid, me.id, msg, Date.now());
+      return json(res, 200, { ok: true });
+    }
+    if (p === "/api/my/applications" && m === "GET") {
+      if (!me) return need();
+      return json(res, 200, Q("SELECT a.id,a.status,a.created,j.title FROM applications a JOIN jobs j ON j.id=a.job WHERE a.user=? ORDER BY a.created DESC").all(me.id));
+    }
+    if (p === "/api/my/applicants" && m === "GET") {
+      if (!me) return need();
+      if (me.role !== "agency") return json(res, 403, { error: "Только для агентств" });
+      return json(res, 200, Q("SELECT a.id,a.status,a.message,a.created,j.title,u.name,u.email FROM applications a JOIN jobs j ON j.id=a.job JOIN users u ON u.id=a.user WHERE j.user=? ORDER BY a.created DESC LIMIT 100").all(me.id));
     }
     // Модерация
     if (p.startsWith("/api/admin/")) {
