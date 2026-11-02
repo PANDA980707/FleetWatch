@@ -22,3 +22,17 @@ ship-info-server/
 FleetWatch
 *.iml
 .idea/
+.bash_history
+.bashrc
+.gitconfig
+.lesshst
+.config/
+.npm/
+.ssh/
+downloads/
+node_modules/
+*.db
+*.db-shm
+*.db-wal
+*.apk
+*.zip
