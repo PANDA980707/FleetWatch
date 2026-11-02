@@ -33,6 +33,11 @@ jobs:
             sed -i "s/kotlin([^)]*) version \"[^\"]*\"/id \"org.jetbrains.kotlin.android\" version \"1.9.24\" apply false/" android/settings.gradle || true
           fi
 
+      - name: Allow internet
+        run: |
+          sed -i '/<application/i <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+          grep -q "permission.INTERNET" android/app/src/main/AndroidManifest.xml
+
       - name: Get dependencies
         run: flutter pub get
 
