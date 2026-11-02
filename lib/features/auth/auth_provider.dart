@@ -16,13 +16,14 @@ class AuthState {
   const AuthState({this.user, this.token, this.isLoading = false, this.error});
 
   bool get isLoggedIn => user != null;
+  bool get hasError => error != null && error!.isNotEmpty;
 
   AuthState copyWith({User? user, String? token, bool? isLoading, String? error}) {
     return AuthState(
       user: user ?? this.user,
       token: token ?? this.token,
       isLoading: isLoading ?? this.isLoading,
-      error: error,
+      error: error ?? this.error,
     );
   }
 }
@@ -33,15 +34,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   String _msg(Object e) {
-    if (e is TimeoutException) return 'Сервер не отвечает, попробуйте ещё раз';
-    return e.toString().replaceFirst('Exception: ', '');
+    if (e is TimeoutException) return 'Сервер не отвечает, попробуйте ещё раз.';
+    if (e is FormatException) return 'Неверный ответ сервера.';
+    return e.toString().replaceFirst('Exception: ', '').trim();
   }
 
-  Future<Map<String, dynamic>> _call(String method, String path,
-      {Map<String, dynamic>? body, String? token}) async {
+  Future<void> clearError() async {
+    state = state.copyWith(error: null);
+  }
+
+  Future<Map<String, dynamic>> _call(
+    String method,
+    String path, {
+    Map<String, dynamic>? body,
+    String? token,
+  }) async {
     final uri = Uri.parse(apiBase + path);
     final headers = <String, String>{'Content-Type': 'application/json'};
-    if (token != null) headers['Authorization'] = 'Bearer ' + token;
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
     http.Response res;
     if (method == 'GET') {
       res = await http.get(uri, headers: headers).timeout(const Duration(seconds: 60));
@@ -50,13 +63,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
           .post(uri, headers: headers, body: jsonEncode(body ?? {}))
           .timeout(const Duration(seconds: 60));
     }
+
     Map<String, dynamic> data = {};
     try {
       data = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
     } catch (_) {}
-    if (res.statusCode != 200) {
-      throw Exception(data['error'] ?? 'Ошибка сервера (' + res.statusCode.toString() + ')');
+
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception(data['error'] ?? 'Ошибка сервера (${res.statusCode}).');
     }
+
     return data;
   }
 
@@ -87,37 +103,52 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await prefs.remove('token');
       }
     } catch (_) {}
+
     state = const AuthState();
   }
 
   Future<void> _finish(String token) async {
     final user = await _loadMe(token);
-    if (user == null) throw Exception('Не удалось войти');
+    if (user == null) throw Exception('Не удалось войти.');
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
-    state = AuthState(user: user, token: token);
+
+    state = AuthState(user: user, token: token, isLoading: false, error: null);
   }
 
   Future<void> login(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final data = await _call('POST', '/api/login',
-          body: {'email': email.trim(), 'password': password});
+      final data = await _call(
+        'POST',
+        '/api/login',
+        body: {'email': email.trim(), 'password': password},
+      );
       await _finish(data['token'] as String);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _msg(e));
     }
   }
 
-  Future<void> register(String email, String password, String name, UserRole role) async {
+  Future<void> register(
+    String email,
+    String password,
+    String name,
+    UserRole role,
+  ) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final data = await _call('POST', '/api/register', body: {
-        'email': email.trim(),
-        'password': password,
-        'name': name.trim(),
-        'role': role == UserRole.crewing ? 'agency' : 'seaman',
-      });
+      final data = await _call(
+        'POST',
+        '/api/register',
+        body: {
+          'email': email.trim(),
+          'password': password,
+          'name': name.trim(),
+          'role': role == UserRole.crewing ? 'agency' : 'seaman',
+        },
+      );
       await _finish(data['token'] as String);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _msg(e));
@@ -130,7 +161,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('token');
-      if (token != null) await _call('POST', '/api/logout', token: token);
+      if (token != null) {
+        await _call('POST', '/api/logout', token: token);
+      }
     } catch (_) {}
   }
 }
