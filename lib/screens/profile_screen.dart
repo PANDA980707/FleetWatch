@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../features/auth/auth_provider.dart';
+import '../features/auth/user_model.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authProvider);
+    final user = auth.user;
+    final isAgency = user?.role == UserRole.crewing;
+
     return Scaffold(
       backgroundColor: const Color(0xFF0B132B),
       appBar: AppBar(
-        title: const Text(
-          'Профиль & PRO',
-          style: TextStyle(
+        title: Text(
+          isAgency ? 'Профиль крюинга' : 'Профиль & PRO',
+          style: const TextStyle(
             color: Color(0xFF00FF87),
             fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: const Color(0xFF1C2541),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Color(0xFF00FF87)),
+            onPressed: () async {
+              await ref.read(authProvider.notifier).logout();
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: ListView(
@@ -30,36 +45,37 @@ class ProfileScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 31,
-                    backgroundColor: Color(0xFF00FF87),
-                    child: Icon(Icons.person, size: 34, color: Color(0xFF0B132B)),
+                    backgroundColor: const Color(0xFF00FF87),
+                    child: Icon(
+                      isAgency ? Icons.business : Icons.person,
+                      size: 34,
+                      color: const Color(0xFF0B132B),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          'Капитан Александр',
-                          style: TextStyle(
+                          user?.name ?? 'Гость',
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          'Master / Captain (FG)',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                          ),
+                          user?.email ?? '',
+                          style: const TextStyle(color: Colors.white70, fontSize: 13),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
-                          '🟢 Готов к выходу в рейс',
-                          style: TextStyle(
+                          isAgency ? '🏢 Крюинговая компания' : '🌊 Моряк',
+                          style: const TextStyle(
                             color: Color(0xFF00FF87),
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -72,49 +88,100 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 22),
-            const Text(
-              'Морской PRO-функционал',
-              style: TextStyle(
+            Text(
+              isAgency ? 'Инструменты крюинга' : 'Морской PRO-функционал',
+              style: const TextStyle(
                 color: Color(0xFF00F2FE),
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
-            _buildFeatureTile(
-              context,
-              icon: Icons.picture_as_pdf,
-              title: 'Генератор CV в PDF',
-              subtitle: 'Создать международное резюме за 1 клик.',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('PDF-резюме успешно создано.')),
-                );
+            if (isAgency) ...[
+              _tile(
+                context,
+                icon: Icons.work_outline,
+                title: 'Мои вакансии',
+                subtitle: 'Публикация и статус объявлений (на модерации / одобрено).',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Список вакансий — во вкладке «Вакансии» → Опубликовать')),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              _tile(
+                context,
+                icon: Icons.people_outline,
+                title: 'Отклики моряков',
+                subtitle: 'Заявки на ваши вакансии.',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Раздел откликов скоро будет в профиле')),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              _tile(
+                context,
+                icon: Icons.star_outline,
+                title: 'Рейтинг компании',
+                subtitle: 'Отзывы моряков о вашем крюинге.',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Рейтинг агентств — в разработке')),
+                  );
+                },
+              ),
+            ] else ...[
+              _tile(
+                context,
+                icon: Icons.picture_as_pdf,
+                title: 'Генератор CV в PDF',
+                subtitle: 'Создать международное резюме за 1 клик.',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('PDF-резюме — скоро')),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              _tile(
+                context,
+                icon: Icons.notifications_active,
+                title: 'Трекер документов и дипломов',
+                subtitle: 'Напоминания о STCW, медкомиссии и сертификатах.',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Трекер документов — скоро')),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              _tile(
+                context,
+                icon: Icons.rocket_launch,
+                title: 'Авторассылка в крюинги',
+                subtitle: 'Приоритетная рассылка анкеты для PRO.',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Авторассылка — скоро')),
+                  );
+                },
+              ),
+            ],
+            const SizedBox(height: 24),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.redAccent,
+                side: const BorderSide(color: Colors.redAccent),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              onPressed: () async {
+                await ref.read(authProvider.notifier).logout();
               },
-            ),
-            const SizedBox(height: 10),
-            _buildFeatureTile(
-              context,
-              icon: Icons.notifications_active,
-              title: 'Трекер документов и дипломов',
-              subtitle: 'Напоминания о STCW, медкомиссии и сертификатах.',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Все сертификаты актуальны.')),
-                );
-              },
-            ),
-            const SizedBox(height: 10),
-            _buildFeatureTile(
-              context,
-              icon: Icons.rocket_launch,
-              title: 'Авторассылка в 50+ крюингов',
-              subtitle: 'Приоритетная рассылка анкеты для PRO-пользователей.',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Анкета отправлена в крюинговые компании.')),
-                );
-              },
+              icon: const Icon(Icons.logout),
+              label: const Text('Выйти из аккаунта'),
             ),
           ],
         ),
@@ -122,7 +189,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  static Widget _buildFeatureTile(
+  static Widget _tile(
     BuildContext context, {
     required IconData icon,
     required String title,
@@ -137,20 +204,8 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: ListTile(
         leading: Icon(icon, color: const Color(0xFF00FF87), size: 28),
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(
-            color: Colors.white54,
-            fontSize: 12,
-          ),
-        ),
+        title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        subtitle: Text(subtitle, style: const TextStyle(color: Colors.white54, fontSize: 12)),
         trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 16),
         onTap: onTap,
       ),
