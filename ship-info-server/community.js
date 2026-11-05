@@ -130,6 +130,9 @@ module.exports = async function (req, res, u, json) {
       x = /^\/api\/admin\/reviews\/(\d+)$/.exec(p);
       if (x && m === "POST") { Q("UPDATE reviews SET hidden=?, reports=CASE WHEN ?=0 THEN 0 ELSE reports END WHERE id=?").run(b.action === "hide" ? 1 : 0, b.action === "hide" ? 1 : 0, +x[1]); return json(res, 200, { ok: true }); }
     }
+    // Список крюингов
+    if (p === "/api/agencies" && m === "GET")
+      return json(res, 200, Q("SELECT id,name,email,created FROM users WHERE role='agency' ORDER BY created DESC LIMIT 100").all());
     return json(res, 404, { error: "Не найдено" });
   } catch (e) { console.error(e); return json(res, 400, { error: "Некорректный запрос" }); }
 };
