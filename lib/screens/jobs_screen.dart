@@ -20,6 +20,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
   String? _error;
   String? _rankFilter;
   String? _shipFilter;
+  String _search = '';
 
   @override
   void initState() {
@@ -28,10 +29,16 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
   }
 
   void _applyFilter() {
+    final q = _search.toLowerCase();
     _filtered = _jobs.where((j) {
       final rankOk = _rankFilter == null || _rankFilter!.isEmpty || (j['rank'] ?? '').toString().toLowerCase().contains(_rankFilter!.toLowerCase());
       final shipOk = _shipFilter == null || _shipFilter!.isEmpty || (j['ship_type'] ?? '').toString().toLowerCase().contains(_shipFilter!.toLowerCase());
-      return rankOk && shipOk;
+      final searchOk = q.isEmpty ||
+          (j['title'] ?? '').toString().toLowerCase().contains(q) ||
+          (j['rank'] ?? '').toString().toLowerCase().contains(q) ||
+          (j['agency'] ?? '').toString().toLowerCase().contains(q) ||
+          (j['descr'] ?? '').toString().toLowerCase().contains(q);
+      return rankOk && shipOk && searchOk;
     }).toList();
   }
 
@@ -277,7 +284,26 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                       child: Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                          child: TextField(
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              hintText: 'Поиск вакансий...',
+                              hintStyle: const TextStyle(color: Colors.white38),
+                              prefixIcon: const Icon(Icons.search, color: Colors.white38),
+                              filled: true,
+                              fillColor: const Color(0xFF16181C),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                            ),
+                            onChanged: (v) {
+                              _search = v;
+                              setState(_applyFilter);
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
                           child: Row(
                             children: [
                               Expanded(
