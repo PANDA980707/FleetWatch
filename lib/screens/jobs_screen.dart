@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../features/auth/auth_provider.dart';
 import '../features/auth/user_model.dart';
+import 'job_detail_screen.dart';
 
 class JobsScreen extends ConsumerStatefulWidget {
   const JobsScreen({super.key});
@@ -261,7 +262,14 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                         itemCount: _jobs.length,
                         itemBuilder: (context, index) {
                           final job = _jobs[index];
-                          return Container(
+                          return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => JobDetailScreen(job: job)),
+                            );
+                          },
+                          child: Container(
                             margin: const EdgeInsets.only(bottom: 16),
                             padding: const EdgeInsets.all(18),
                             decoration: BoxDecoration(
@@ -320,7 +328,8 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                                 ),
                               ],
                             ),
-                          );
+                          ),
+                        );
                         },
                       ),
                     ),
