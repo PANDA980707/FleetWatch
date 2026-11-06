@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, email TEXT UNIQUE, name
 CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY, user INTEGER, exp INTEGER);
 CREATE TABLE IF NOT EXISTS reviews(id INTEGER PRIMARY KEY, mmsi INTEGER, ship TEXT, user INTEGER, rating INTEGER, text TEXT, created INTEGER, hidden INTEGER DEFAULT 0, reports INTEGER DEFAULT 0, UNIQUE(mmsi,user));
 CREATE TABLE IF NOT EXISTS reports(review INTEGER, user INTEGER, PRIMARY KEY(review,user));
-CREATE TABLE IF NOT EXISTS jobs(id INTEGER PRIMARY KEY, user INTEGER, title TEXT, rank TEXT, ship_type TEXT, salary TEXT, contact TEXT, descr TEXT, status TEXT DEFAULT 'pending', created INTEGER);`);
+CREATE TABLE IF NOT EXISTS jobs(id INTEGER PRIMARY KEY, user INTEGER, title TEXT, rank TEXT, ship_type TEXT, salary TEXT, contact TEXT, descr TEXT, status TEXT DEFAULT 'approved', created INTEGER);`);
 const Q = (sql) => db.prepare(sql);
 db.exec("CREATE TABLE IF NOT EXISTS applications(id INTEGER PRIMARY KEY, job INTEGER, user INTEGER, message TEXT, status TEXT DEFAULT 'new', created INTEGER, UNIQUE(job,user))");
 const ADMIN = (process.env.ADMIN_EMAIL || "").toLowerCase();
