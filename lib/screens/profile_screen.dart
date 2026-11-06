@@ -17,6 +17,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   List<Map<String, dynamic>> _list = [];
   bool _loadingList = false;
   String? _avatar;
+  final _rankC = TextEditingController();
+  final _expC = TextEditingController();
+  final _vesselC = TextEditingController();
+  final _natC = TextEditingController();
+  final _phoneC = TextEditingController();
 
   Future<void> _loadList() async {
     final auth = ref.read(authProvider);
@@ -48,6 +53,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _list = [];
         _loadingList = false;
       });
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    final auth = ref.read(authProvider);
+    if (!auth.isLoggedIn || auth.token == null) return;
+    try {
+      final res = await http.post(
+        Uri.parse('$apiBase/api/me/profile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${auth.token}',
+        },
+        body: jsonEncode({
+          'rank': _rankC.text.trim(),
+          'experience': _expC.text.trim(),
+          'vessel_type': _vesselC.text.trim(),
+          'nationality': _natC.text.trim(),
+          'phone': _phoneC.text.trim(),
+        }),
+      ).timeout(const Duration(seconds: 30));
+      if (res.statusCode == 200 && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Анкета сохранена')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Не удалось сохранить')),
+        );
+      }
     }
   }
 
@@ -170,6 +207,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            if (!isAgency) ...[
+              const Text('Анкета', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              _field(_rankC, 'Должность'),
+              _field(_expC, 'Опыт (лет / рейсы)'),
+              _field(_vesselC, 'Тип судна'),
+              _field(_natC, 'Гражданство'),
+              _field(_phoneC, 'Телефон'),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1D9BF0),
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: _saveProfile,
+                child: const Text('Сохранить анкету'),
+              ),
+              const SizedBox(height: 20),
+            ],
             Text(
               isAgency ? 'Отклики на ваши вакансии' : 'Мои отклики',
               style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
@@ -231,5 +287,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       ),
     );
+  Widget _field(TextEditingController c, String hint) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: TextField(
+        controller: c,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.white38),
+          filled: true,
+          fillColor: const Color(0xFF16181C),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        ),
+      ),
+    );
+  }
   }
 }
