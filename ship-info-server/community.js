@@ -4,7 +4,7 @@ const { DatabaseSync } = require("node:sqlite");
 const crypto = require("crypto"), path = require("path");
 const db = new DatabaseSync(process.env.DB_PATH || path.join(__dirname, "data.db"));
 db.exec(`PRAGMA journal_mode=WAL;
-CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, role TEXT, pass TEXT, created INTEGER);
+CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, role TEXT, pass TEXT, avatar TEXT, created INTEGER);
 CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY, user INTEGER, exp INTEGER);
 CREATE TABLE IF NOT EXISTS reviews(id INTEGER PRIMARY KEY, mmsi INTEGER, ship TEXT, user INTEGER, rating INTEGER, text TEXT, created INTEGER, hidden INTEGER DEFAULT 0, reports INTEGER DEFAULT 0, UNIQUE(mmsi,user));
 CREATE TABLE IF NOT EXISTS reports(review INTEGER, user INTEGER, PRIMARY KEY(review,user));
@@ -152,6 +152,19 @@ module.exports = async function (req, res, u, json) {
       Q("INSERT INTO agency_reviews(agency,user,rating,text,created) VALUES(?,?,?,?,?) ON CONFLICT(agency,user) DO UPDATE SET rating=excluded.rating,text=excluded.text,created=excluded.created")
         .run(agency, me.id, rating, text, Date.now());
       return json(res, 200, { ok: true });
+    }
+
+    if (p === "/api/me/avatar" && m === "POST") {
+      if (!me) return need();
+      const data = str(b.avatar, 500000);
+      if (!data.startsWith("data:image/")) return json(res, 400, { error: "Нужно изображение" });
+      Q("UPDATE users SET avatar=? WHERE id=?").run(data, me.id);
+      return json(res, 200, { ok: true });
+    }
+    if (p === "/api/me" && m === "GET") {
+      if (!me) return need();
+      const u = Q("SELECT id,email,name,role,avatar FROM users WHERE id=?").get(me.id);
+      return json(res, 200, u);
     }
     return json(res, 404, { error: "Не найдено" });
   } catch (e) { console.error(e); return json(res, 400, { error: "Некорректный запрос" }); }
