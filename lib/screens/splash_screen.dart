@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B132B),
+      backgroundColor: const Color(0xFF000000),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -47,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF00FF87).withOpacity(0.3),
+                      color: const Color(0xFF1D9BF0).withOpacity(0.3),
                       blurRadius: 30,
                       spreadRadius: 5,
                     ),
@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 child: const Icon(
                   Icons.anchor,
                   size: 80,
-                  color: Color(0xFF00FF87),
+                  color: Color(0xFF1D9BF0),
                 ),
               ),
             ),

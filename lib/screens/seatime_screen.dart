@@ -25,16 +25,16 @@ class _SeaTimeScreenState extends State<SeaTimeScreen> {
     final missing = (requirement - _monthsInService).clamp(0, 100).toInt();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B132B),
+      backgroundColor: const Color(0xFF000000),
       appBar: AppBar(
         title: const Text(
           'Калькулятор Плавценза',
           style: TextStyle(
-            color: Color(0xFF00FF87),
+            color: Color(0xFF1D9BF0),
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: const Color(0xFF1C2541),
+        backgroundColor: const Color(0xFF16181C),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -62,15 +62,15 @@ class _SeaTimeScreenState extends State<SeaTimeScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1C2541),
+                  color: const Color(0xFF16181C),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF00FF87).withOpacity(0.3)),
+                  border: Border.all(color: const Color(0xFF1D9BF0).withOpacity(0.3)),
                 ),
                 child: DropdownButton<String>(
                   value: _selectedRank,
                   isExpanded: true,
                   underline: const SizedBox(),
-                  dropdownColor: const Color(0xFF1C2541),
+                  dropdownColor: const Color(0xFF16181C),
                   style: const TextStyle(color: Colors.white, fontSize: 15),
                   items: _requirements.keys.map((String value) {
                     return DropdownMenuItem<String>(
@@ -89,7 +89,7 @@ class _SeaTimeScreenState extends State<SeaTimeScreen> {
               Text(
                 'Наплаванный стаж: ${_monthsInService.toStringAsFixed(0)} месяцев',
                 style: const TextStyle(
-                  color: Color(0xFF00FF87),
+                  color: Color(0xFF1D9BF0),
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
                 ),
@@ -100,7 +100,7 @@ class _SeaTimeScreenState extends State<SeaTimeScreen> {
                 min: 0,
                 max: 36,
                 divisions: 36,
-                activeColor: const Color(0xFF00FF87),
+                activeColor: const Color(0xFF1D9BF0),
                 inactiveColor: Colors.white24,
                 label: '${_monthsInService.round()} мес.',
                 onChanged: (value) {
@@ -111,11 +111,11 @@ class _SeaTimeScreenState extends State<SeaTimeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1C2541),
+                  color: const Color(0xFF16181C),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: metRequirement
-                        ? const Color(0xFF00FF87)
+                        ? const Color(0xFF1D9BF0)
                         : const Color(0xFFFFB703),
                   ),
                 ),
@@ -125,7 +125,7 @@ class _SeaTimeScreenState extends State<SeaTimeScreen> {
                     const Text(
                       '📊 Статус соответствия требований',
                       style: TextStyle(
-                        color: Color(0xFF00F2FE),
+                        color: Color(0xFF1D9BF0),
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),

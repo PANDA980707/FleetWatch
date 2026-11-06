@@ -113,8 +113,8 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
         return StatefulBuilder(
           builder: (ctx, setLocal) {
             return AlertDialog(
-              backgroundColor: const Color(0xFF1C2541),
-              title: const Text('Отзыв о судне', style: TextStyle(color: Color(0xFF00FF87))),
+              backgroundColor: const Color(0xFF16181C),
+              title: const Text('Отзыв о судне', style: TextStyle(color: Color(0xFF1D9BF0))),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -156,7 +156,7 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
                 TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Отмена')),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00FF87),
+                    backgroundColor: const Color(0xFF1D9BF0),
                     foregroundColor: Colors.black,
                   ),
                   onPressed: _submit,
@@ -178,18 +178,18 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B132B),
+      backgroundColor: const Color(0xFF000000),
       appBar: AppBar(
         title: const Text(
           'Отзывы о судах',
-          style: TextStyle(color: Color(0xFF00FF87), fontWeight: FontWeight.bold),
+          style: TextStyle(color: Color(0xFF1D9BF0), fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color(0xFF1C2541),
+        backgroundColor: const Color(0xFF16181C),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF00FF87),
+        backgroundColor: const Color(0xFF1D9BF0),
         onPressed: _showAddDialog,
-        child: const Icon(Icons.add, color: Color(0xFF0B132B)),
+        child: const Icon(Icons.add, color: Color(0xFF000000)),
       ),
       body: SafeArea(
         child: Column(
@@ -207,7 +207,7 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
                         hintText: 'MMSI судна',
                         hintStyle: const TextStyle(color: Colors.white38),
                         filled: true,
-                        fillColor: const Color(0xFF1C2541),
+                        fillColor: const Color(0xFF16181C),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -218,7 +218,7 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
                   const SizedBox(width: 10),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00FF87),
+                      backgroundColor: const Color(0xFF1D9BF0),
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
                     ),
@@ -247,7 +247,7 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
             const SizedBox(height: 8),
             Expanded(
               child: _loading
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF00FF87)))
+                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF1D9BF0)))
                   : _error != null
                       ? Center(child: Text(_error!, style: const TextStyle(color: Colors.white70)))
                       : _items.isEmpty
@@ -267,9 +267,9 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
                                   margin: const EdgeInsets.only(bottom: 12),
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF1C2541),
+                                    color: const Color(0xFF16181C),
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: const Color(0xFF00FF87).withOpacity(0.25)),
+                                    border: Border.all(color: const Color(0xFF1D9BF0).withOpacity(0.25)),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,

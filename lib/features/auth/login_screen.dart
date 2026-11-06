@@ -35,7 +35,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B132B),
+      backgroundColor: const Color(0xFF000000),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -49,14 +49,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const Icon(
                     Icons.anchor,
                     size: 72,
-                    color: Color(0xFF00FF87),
+                    color: Color(0xFF1D9BF0),
                   ),
                   const SizedBox(height: 16),
                   const Text(
                     'FleetWatch',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Color(0xFF00FF87),
+                      color: Color(0xFF1D9BF0),
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
@@ -79,7 +79,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       labelText: 'Email',
                       labelStyle: TextStyle(color: Colors.white70),
                       filled: true,
-                      fillColor: Color(0xFF1C2541),
+                      fillColor: Color(0xFF16181C),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)),
                         borderSide: BorderSide(color: Color(0xFF2A3A5D)),
@@ -104,7 +104,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       labelText: 'Пароль',
                       labelStyle: TextStyle(color: Colors.white70),
                       filled: true,
-                      fillColor: Color(0xFF1C2541),
+                      fillColor: Color(0xFF16181C),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)),
                         borderSide: BorderSide(color: Color(0xFF2A3A5D)),
@@ -140,8 +140,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: authState.isLoading ? null : _submit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00FF87),
-                        foregroundColor: const Color(0xFF0B132B),
+                        backgroundColor: const Color(0xFF1D9BF0),
+                        foregroundColor: const Color(0xFF000000),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -153,7 +153,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Color(0xFF0B132B),
+                                  Color(0xFF000000),
                                 ),
                               ),
                             )
@@ -172,7 +172,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: const Text(
                       'Создать аккаунт',
                       style: TextStyle(
-                        color: Color(0xFF00FF87),
+                        color: Color(0xFF1D9BF0),
                         fontWeight: FontWeight.bold,
                       ),
                     ),

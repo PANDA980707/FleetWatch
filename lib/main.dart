@@ -17,12 +17,12 @@ class FleetWatchApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       routerConfig: router,
       theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0B132B),
+        scaffoldBackgroundColor: const Color(0xFF000000),
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF00FF87),
-          surface: Color(0xFF1C2541),
+          primary: Color(0xFF1D9BF0),
+          surface: Color(0xFF16181C),
         ),
-        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF1C2541)),
+        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF16181C)),
       ),
     );
   }

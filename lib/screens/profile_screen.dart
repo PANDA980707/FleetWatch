@@ -62,20 +62,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final isAgency = user?.role == UserRole.crewing;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B132B),
+      backgroundColor: const Color(0xFF000000),
       appBar: AppBar(
         title: Text(
           isAgency ? 'Профиль крюинга' : 'Профиль & PRO',
-          style: const TextStyle(color: Color(0xFF00FF87), fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Color(0xFF1D9BF0), fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color(0xFF1C2541),
+        backgroundColor: const Color(0xFF16181C),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF00FF87)),
+            icon: const Icon(Icons.refresh, color: Color(0xFF1D9BF0)),
             onPressed: _loadList,
           ),
           IconButton(
-            icon: const Icon(Icons.logout, color: Color(0xFF00FF87)),
+            icon: const Icon(Icons.logout, color: Color(0xFF1D9BF0)),
             onPressed: () => ref.read(authProvider.notifier).logout(),
           ),
         ],
@@ -87,19 +87,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: const Color(0xFF1C2541),
+                color: const Color(0xFF16181C),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFF00FF87).withOpacity(0.4)),
+                border: Border.all(color: const Color(0xFF1D9BF0).withOpacity(0.4)),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 31,
-                    backgroundColor: const Color(0xFF00FF87),
+                    backgroundColor: const Color(0xFF1D9BF0),
                     child: Icon(
                       isAgency ? Icons.business : Icons.person,
                       size: 34,
-                      color: const Color(0xFF0B132B),
+                      color: const Color(0xFF000000),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -116,7 +116,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         const SizedBox(height: 8),
                         Text(
                           isAgency ? '🏢 Крюинговая компания' : '🌊 Моряк',
-                          style: const TextStyle(color: Color(0xFF00FF87), fontSize: 12, fontWeight: FontWeight.bold),
+                          style: const TextStyle(color: Color(0xFF1D9BF0), fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -127,13 +127,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 22),
             Text(
               isAgency ? 'Отклики на ваши вакансии' : 'Мои отклики',
-              style: const TextStyle(color: Color(0xFF00F2FE), fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(color: Color(0xFF1D9BF0), fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             if (_loadingList)
               const Padding(
                 padding: EdgeInsets.all(24),
-                child: Center(child: CircularProgressIndicator(color: Color(0xFF00FF87))),
+                child: Center(child: CircularProgressIndicator(color: Color(0xFF1D9BF0))),
               )
             else if (_list.isEmpty)
               const Padding(
@@ -150,7 +150,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1C2541),
+                    color: const Color(0xFF16181C),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.white.withOpacity(0.08)),
                   ),
@@ -170,7 +170,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ] else ...[
                         const SizedBox(height: 4),
                         Text('Статус: ${item['status'] ?? 'new'}',
-                            style: const TextStyle(color: Color(0xFF00FF87), fontSize: 13)),
+                            style: const TextStyle(color: Color(0xFF1D9BF0), fontSize: 13)),
                       ],
                     ],
                   ),

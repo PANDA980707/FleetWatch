@@ -62,7 +62,7 @@ class _CrewingScreenState extends ConsumerState<CrewingScreen> {
       if (!mounted) return;
       showModalBottomSheet(
         context: context,
-        backgroundColor: const Color(0xFF1C2541),
+        backgroundColor: const Color(0xFF16181C),
         isScrollControlled: true,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -88,22 +88,22 @@ class _CrewingScreenState extends ConsumerState<CrewingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B132B),
+      backgroundColor: const Color(0xFF000000),
       appBar: AppBar(
         title: const Text(
           'Крюинговые агентства',
-          style: TextStyle(color: Color(0xFF00FF87), fontWeight: FontWeight.bold),
+          style: TextStyle(color: Color(0xFF1D9BF0), fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color(0xFF1C2541),
+        backgroundColor: const Color(0xFF16181C),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF00FF87)),
+            icon: const Icon(Icons.refresh, color: Color(0xFF1D9BF0)),
             onPressed: _load,
           ),
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF00FF87)))
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF1D9BF0)))
           : _error != null
               ? Center(
                   child: Column(
@@ -114,7 +114,7 @@ class _CrewingScreenState extends ConsumerState<CrewingScreen> {
                       ElevatedButton(
                         onPressed: _load,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00FF87),
+                          backgroundColor: const Color(0xFF1D9BF0),
                           foregroundColor: Colors.black,
                         ),
                         child: const Text('Повторить'),
@@ -130,7 +130,7 @@ class _CrewingScreenState extends ConsumerState<CrewingScreen> {
                       ),
                     )
                   : RefreshIndicator(
-                      color: const Color(0xFF00FF87),
+                      color: const Color(0xFF1D9BF0),
                       onRefresh: _load,
                       child: ListView.builder(
                         padding: const EdgeInsets.all(16),
@@ -143,9 +143,9 @@ class _CrewingScreenState extends ConsumerState<CrewingScreen> {
                               margin: const EdgeInsets.only(bottom: 14),
                               padding: const EdgeInsets.all(18),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1C2541),
+                                color: const Color(0xFF16181C),
                                 borderRadius: BorderRadius.circular(18),
-                                border: Border.all(color: const Color(0xFF00FF87).withOpacity(0.25)),
+                                border: Border.all(color: const Color(0xFF1D9BF0).withOpacity(0.25)),
                               ),
                               child: Row(
                                 children: [
@@ -153,10 +153,10 @@ class _CrewingScreenState extends ConsumerState<CrewingScreen> {
                                     width: 52,
                                     height: 52,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF00FF87).withOpacity(0.12),
+                                      color: const Color(0xFF1D9BF0).withOpacity(0.12),
                                       borderRadius: BorderRadius.circular(14),
                                     ),
-                                    child: const Icon(Icons.business, color: Color(0xFF00FF87), size: 28),
+                                    child: const Icon(Icons.business, color: Color(0xFF1D9BF0), size: 28),
                                   ),
                                   const SizedBox(width: 14),
                                   Expanded(
@@ -293,7 +293,7 @@ class _ReviewsSheetState extends ConsumerState<_ReviewsSheet> {
           children: [
             Text(
               widget.agencyName,
-              style: const TextStyle(color: Color(0xFF00FF87), fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(color: Color(0xFF1D9BF0), fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Row(
@@ -326,14 +326,14 @@ class _ReviewsSheetState extends ConsumerState<_ReviewsSheet> {
                 hintText: 'Ваш отзыв (от 10 символов)',
                 hintStyle: TextStyle(color: Colors.white38),
                 filled: true,
-                fillColor: Color(0xFF0B132B),
+                fillColor: Color(0xFF000000),
                 border: OutlineInputBorder(borderSide: BorderSide.none),
               ),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00FF87),
+                backgroundColor: const Color(0xFF1D9BF0),
                 foregroundColor: Colors.black,
               ),
               onPressed: _submit,
@@ -349,7 +349,7 @@ class _ReviewsSheetState extends ConsumerState<_ReviewsSheet> {
                     margin: const EdgeInsets.only(bottom: 10),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0B132B),
+                      color: const Color(0xFF000000),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
