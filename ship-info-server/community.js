@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS reviews(id INTEGER PRIMARY KEY, mmsi INTEGER, ship TE
 CREATE TABLE IF NOT EXISTS reports(review INTEGER, user INTEGER, PRIMARY KEY(review,user));
 CREATE TABLE IF NOT EXISTS jobs(id INTEGER PRIMARY KEY, user INTEGER, title TEXT, rank TEXT, ship_type TEXT, salary TEXT, contact TEXT, descr TEXT, status TEXT DEFAULT 'approved', created INTEGER);`);
 const Q = (sql) => db.prepare(sql);
-db.exec("CREATE TABLE IF NOT EXISTS agency_reviews(id INTEGER PRIMARY KEY, agency INTEGER, user INTEGER, rating INTEGER, text TEXT, created INTEGER, UNIQUE(agency,user));
-CREATE TABLE IF NOT EXISTS applications(id INTEGER PRIMARY KEY, job INTEGER, user INTEGER, message TEXT, status TEXT DEFAULT 'new', created INTEGER, UNIQUE(job,user))");
+db.exec(`CREATE TABLE IF NOT EXISTS agency_reviews(id INTEGER PRIMARY KEY, agency INTEGER, user INTEGER, rating INTEGER, text TEXT, created INTEGER, UNIQUE(agency,user));
+CREATE TABLE IF NOT EXISTS applications(id INTEGER PRIMARY KEY, job INTEGER, user INTEGER, message TEXT, status TEXT DEFAULT 'new', created INTEGER, UNIQUE(job,user))`);
 const ADMIN = (process.env.ADMIN_EMAIL || "").toLowerCase();
 const sha = (s) => crypto.createHash("sha256").update(s).digest("hex");
 const hash = (p) => { const s = crypto.randomBytes(16).toString("hex"); return s + ":" + crypto.scryptSync(p, s, 64).toString("hex"); };
