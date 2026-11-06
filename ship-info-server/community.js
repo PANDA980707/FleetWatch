@@ -166,6 +166,13 @@ module.exports = async function (req, res, u, json) {
       const u = Q("SELECT id,email,name,role,avatar FROM users WHERE id=?").get(me.id);
       return json(res, 200, u);
     }
+
+    if (p === "/api/me/profile" && m === "POST") {
+      if (!me) return need();
+      Q("UPDATE users SET seaman_rank=?, experience=?, vessel_type=?, nationality=?, phone=? WHERE id=?")
+        .run(str(b.rank,100), str(b.experience,200), str(b.vessel_type,100), str(b.nationality,50), str(b.phone,30), me.id);
+      return json(res, 200, { ok: true });
+    }
     return json(res, 404, { error: "Не найдено" });
   } catch (e) { console.error(e); return json(res, 400, { error: "Некорректный запрос" }); }
 };
