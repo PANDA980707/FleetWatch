@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import '../features/auth/auth_provider.dart';
 import '../features/auth/user_model.dart';
+import 'privacy_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -273,6 +274,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   )),
             const SizedBox(height: 24),
+            TextButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacyScreen()));
+              },
+              child: const Text('Политика конфиденциальности', style: TextStyle(color: Color(0xFF1D9BF0))),
+            ),
+            const SizedBox(height: 8),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.redAccent,
