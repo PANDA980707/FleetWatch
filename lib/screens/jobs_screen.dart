@@ -15,13 +15,24 @@ class JobsScreen extends ConsumerStatefulWidget {
 
 class _JobsScreenState extends ConsumerState<JobsScreen> {
   List<Map<String, dynamic>> _jobs = [];
+  List<Map<String, dynamic>> _filtered = [];
   bool _loading = true;
   String? _error;
+  String? _rankFilter;
+  String? _shipFilter;
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  void _applyFilter() {
+    _filtered = _jobs.where((j) {
+      final rankOk = _rankFilter == null || _rankFilter!.isEmpty || (j['rank'] ?? '').toString().toLowerCase().contains(_rankFilter!.toLowerCase());
+      final shipOk = _shipFilter == null || _shipFilter!.isEmpty || (j['ship_type'] ?? '').toString().toLowerCase().contains(_shipFilter!.toLowerCase());
+      return rankOk && shipOk;
+    }).toList();
   }
 
   Future<void> _load() async {
@@ -42,6 +53,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
           .toList();
       setState(() {
         _jobs = list;
+        _applyFilter();
         _loading = false;
       });
     } catch (e) {
@@ -257,11 +269,61 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                   : RefreshIndicator(
                       color: const Color(0xFF1D9BF0),
                       onRefresh: _load,
-                      child: ListView.builder(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 4),
+                        Expanded(
+                          child: ListView.builder(
+                      child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                                  decoration: InputDecoration(
+                                    hintText: 'Должность',
+                                    hintStyle: const TextStyle(color: Colors.white38),
+                                    filled: true,
+                                    fillColor: const Color(0xFF16181C),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                                  ),
+                                  onChanged: (v) {
+                                    _rankFilter = v;
+                                    setState(_applyFilter);
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: TextField(
+                                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                                  decoration: InputDecoration(
+                                    hintText: 'Тип судна',
+                                    hintStyle: const TextStyle(color: Colors.white38),
+                                    filled: true,
+                                    fillColor: const Color(0xFF16181C),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                                  ),
+                                  onChanged: (v) {
+                                    _shipFilter = v;
+                                    setState(_applyFilter);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: _jobs.length,
+                        itemCount: _filtered.length,
                         itemBuilder: (context, index) {
-                          final job = _jobs[index];
+                          final job = _filtered[index];
                           return GestureDetector(
                           onTap: () {
                             Navigator.push(
