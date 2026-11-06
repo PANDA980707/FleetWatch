@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import '../features/auth/auth_provider.dart';
 import '../features/auth/user_model.dart';
 
@@ -15,6 +16,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   List<Map<String, dynamic>> _list = [];
   bool _loadingList = false;
+  String? _avatar;
 
   Future<void> _loadList() async {
     final auth = ref.read(authProvider);
@@ -49,6 +51,42 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _pickAvatar() async {
+    final auth = ref.read(authProvider);
+    if (!auth.isLoggedIn || auth.token == null) return;
+    final picker = ImagePicker();
+    final file = await picker.pickImage(source: ImageSource.gallery, maxWidth: 512, maxHeight: 512, imageQuality: 70);
+    if (file == null) return;
+    final bytes = await file.readAsBytes();
+    final b64 = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$apiBase/api/me/avatar'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ${auth.token}',
+            },
+            body: jsonEncode({'avatar': b64}),
+          )
+          .timeout(const Duration(seconds: 30));
+      if (res.statusCode == 200) {
+        setState(() => _avatar = b64);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Фото обновлено')),
+          );
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Не удалось загрузить фото')),
+        );
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -62,13 +100,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final isAgency = user?.role == UserRole.crewing;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF000000),
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text(
-          isAgency ? 'Профиль крюинга' : 'Профиль & PRO',
-          style: const TextStyle(color: Color(0xFF1D9BF0), fontWeight: FontWeight.bold),
+          isAgency ? 'Профиль крюинга' : 'Профиль',
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color(0xFF16181C),
+        backgroundColor: Colors.black,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Color(0xFF1D9BF0)),
@@ -88,18 +126,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: const Color(0xFF16181C),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFF1D9BF0).withOpacity(0.4)),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 31,
-                    backgroundColor: const Color(0xFF1D9BF0),
-                    child: Icon(
-                      isAgency ? Icons.business : Icons.person,
-                      size: 34,
-                      color: const Color(0xFF000000),
+                  GestureDetector(
+                    onTap: _pickAvatar,
+                    child: CircleAvatar(
+                      radius: 32,
+                      backgroundColor: const Color(0xFF1D9BF0),
+                      backgroundImage: _avatar != null
+                          ? MemoryImage(base64Decode(_avatar!.split(',').last))
+                          : null,
+                      child: _avatar == null
+                          ? Icon(
+                              isAgency ? Icons.business : Icons.person,
+                              size: 32,
+                              color: Colors.white,
+                            )
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -113,10 +158,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(user?.email ?? '', style: const TextStyle(color: Colors.white70, fontSize: 13)),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         Text(
-                          isAgency ? '🏢 Крюинговая компания' : '🌊 Моряк',
-                          style: const TextStyle(color: Color(0xFF1D9BF0), fontSize: 12, fontWeight: FontWeight.bold),
+                          isAgency ? 'Крюинговая компания' : 'Моряк',
+                          style: const TextStyle(color: Color(0xFF1D9BF0), fontSize: 12),
                         ),
                       ],
                     ),
@@ -124,10 +169,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 20),
             Text(
               isAgency ? 'Отклики на ваши вакансии' : 'Мои отклики',
-              style: const TextStyle(color: Color(0xFF1D9BF0), fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             if (_loadingList)
@@ -139,43 +184,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const Padding(
                 padding: EdgeInsets.all(16),
                 child: Text(
-                  'Пока пусто.\nМоряк откликается на вакансию — заявка появится здесь у крюинга.',
+                  'Пока пусто',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white54),
                 ),
               )
             else
-              ..._list.map((item) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF16181C),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.white.withOpacity(0.08)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item['title']?.toString() ?? 'Вакансия',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      if (isAgency) ...[
-                        const SizedBox(height: 4),
-                        Text('${item['name'] ?? ''} · ${item['email'] ?? ''}',
-                            style: const TextStyle(color: Colors.white70, fontSize: 13)),
-                        if ((item['message'] ?? '').toString().isNotEmpty)
-                          Text(item['message'].toString(), style: const TextStyle(color: Colors.white54, fontSize: 12)),
-                      ] else ...[
-                        const SizedBox(height: 4),
-                        Text('Статус: ${item['status'] ?? 'new'}',
-                            style: const TextStyle(color: Color(0xFF1D9BF0), fontSize: 13)),
+              ..._list.map((item) => Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF16181C),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item['title']?.toString() ?? 'Вакансия',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        if (isAgency) ...[
+                          const SizedBox(height: 4),
+                          Text('${item['name'] ?? ''} · ${item['email'] ?? ''}',
+                              style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                        ] else ...[
+                          const SizedBox(height: 4),
+                          Text('Статус: ${item['status'] ?? 'new'}',
+                              style: const TextStyle(color: Color(0xFF1D9BF0), fontSize: 13)),
+                        ],
                       ],
-                    ],
-                  ),
-                );
-              }),
+                    ),
+                  )),
             const SizedBox(height: 24),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
